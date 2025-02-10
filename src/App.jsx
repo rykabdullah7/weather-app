@@ -187,7 +187,7 @@ function App() {
 
       {/* Footer */}
       <footer className="mt-5 pt-4 text-sm">
-        &copy; {new Date().getFullYear()} Weather App. All rights reserved.
+        &copy; {new Date().getFullYear()} Weather App | M. Abdullah Khan Abbasi | All rights reserved.
       </footer>
     </div>
   );
