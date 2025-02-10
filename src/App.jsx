@@ -5,7 +5,7 @@ import WeatherSkeleton from "./components/WeatherSkeleton";
 import ForecastSkeleton from "./components/ForecastSkeleton";
 import WeatherCard from "./components/WeatherCard";
 import CitySearch from "./components/CitySearch";
-
+import WritingAnimation from "./components/WritingAnimation"
 function App() {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
@@ -132,9 +132,9 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-300 flex flex-col items-center py-8 px-4">
       {/* Header */}
       <header className="w-full max-w-4xl mb-8">
-        <h1 className="text-4xl sm:text-5xl font-bold text-center drop-shadow-lg">
-          Weather App
-        </h1>
+       
+        <WritingAnimation />
+       
       </header>
 
       {/* Main Content */}

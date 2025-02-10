@@ -9,7 +9,7 @@ const ForecastSkeleton = () => {
   const settings = {
     dots: true,
     infinite: false,
-    speed: 500,
+    speed: 1000,
     slidesToShow: 5,
     slidesToScroll: 1,
     responsive: [

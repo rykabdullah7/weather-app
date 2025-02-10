@@ -1,5 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap");
 @import "tailwindcss";
 
+@theme {
+  --font-lobster: "Alex Brush", sans-serif; 
+}
 /* index.css or your global stylesheet */
 
 @keyframes shimmer {
@@ -20,5 +24,5 @@
     #e0e0e0 63%
   );
   background-size: 400% 100%;
-  animation: shimmer 5s linear infinite;
+  animation: shimmer 10s linear infinite;
 }
