@@ -1,9 +1,10 @@
 // src/App.jsx
 import { useState } from "react";
 import ForecastDisplay from "./components/ForecastDisplay";
-import WeatherCard from "./components/WeatherCard";
 import WeatherSkeleton from "./components/WeatherSkeleton";
 import ForecastSkeleton from "./components/ForecastSkeleton";
+import WeatherCard from "./components/WeatherCard";
+import CitySearch from "./components/CitySearch";
 
 function App() {
   const [city, setCity] = useState("");
@@ -13,27 +14,34 @@ function App() {
   const [loading, setLoading] = useState(false);
   const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
 
-  // Fetch weather using city name
-  const fetchWeatherByCity = async () => {
+  // Fetch weather by city name
+  const fetchWeatherByCity = async (cityData) => {
     setError("");
     setWeather(null);
     setForecast([]);
 
-    if (!city.trim()) {
-      setError("Please enter a city name.");
+    // If cityData is not provided or empty, show an error.
+    if (!cityData || !cityData.name) {
+      setError("Please select a valid city.");
       return;
+    }
+
+    // Build query parameters based on available data.
+    let query = "";
+    if (cityData.latitude && cityData.longitude) {
+      query = `lat=${cityData.latitude}&lon=${cityData.longitude}`;
+    } else {
+      query = `q=${encodeURIComponent(cityData.name)}`;
     }
 
     setLoading(true);
     try {
-      // Fetch current weather
+      // Fetch current weather using coordinates if available.
       const weatherResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
-          city
-        )}&appid=${apiKey}&units=metric`
+        `https://api.openweathermap.org/data/2.5/weather?${query}&appid=${apiKey}&units=metric`
       );
       if (!weatherResponse.ok) {
-        throw new Error("City not found");
+        throw new Error("City not found or error fetching weather.");
       }
       const weatherData = await weatherResponse.json();
       setWeather({
@@ -43,18 +51,16 @@ function App() {
         country: weatherData.sys.country,
       });
 
-      // Fetch forecast data
+      // Fetch forecast data using the same query.
       const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
-          city
-        )}&appid=${apiKey}&units=metric`
+        `https://api.openweathermap.org/data/2.5/forecast?${query}&appid=${apiKey}&units=metric`
       );
       if (!forecastResponse.ok) {
-        throw new Error("Error fetching forecast");
+        throw new Error("Error fetching forecast.");
       }
       const forecastData = await forecastResponse.json();
-      // For simplicity, take the first 8 entries
-      setForecast(forecastData.list.slice(0, 10));
+      // For simplicity, take the first 8 entries.
+      setForecast(forecastData.list.slice(0, 8));
     } catch (err) {
       setError(err.message);
     }
@@ -116,35 +122,40 @@ function App() {
     }
   };
 
+  // Callback for when a city is selected from CitySearch
+  const handleCitySelect = (cityData) => {
+    setCity(cityData);
+    fetchWeatherByCity(cityData);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-300 via-purple-300 to-pink-300 flex flex-col items-center py-8 px-4">
       {/* Header */}
       <header className="w-full max-w-4xl mb-8">
-        <h1 className="text-4xl sm:text-5xl font-bold  text-center drop-shadow-lg">
+        <h1 className="text-4xl sm:text-5xl font-bold text-center drop-shadow-lg">
           Weather App
         </h1>
       </header>
 
       {/* Main Content */}
       <main className="w-full max-w-4xl">
-        {/* Input & Buttons */}
-        <div className="mb-8 w-full max-w- mx-auto bg-white/30 backdrop-blur-md rounded-xl shadow-lg p-4 flex flex-col sm:flex-row gap-4">
-          <input
-            type="text"
-            placeholder="Enter city name"
-            className="flex-1 p-3 bg-transparent border border-gray-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-black placeholder-gray-500"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
+        {/* City Search */}
+        <div className="mb-8 w-full max-w-md mx-auto">
+        <div className="mb-8 w-full max-w-md mx-auto">
+          <CitySearch onCitySelect={handleCitySelect} />
+        </div>
+
+        {/* Buttons for Geolocation */}
+        
           <button
-            onClick={fetchWeatherByCity}
-            className="flex-1 bg-blue-600 text-white px-4 py-3 rounded hover:bg-blue-700 transition duration-200 shadow-md"
+            onClick={() => fetchWeatherByCity(city)}
+            className="w-full bg-blue-600 text-white px-4 py-3 rounded hover:bg-blue-700 transition duration-200 shadow-md mb-4"
           >
             Get Weather
           </button>
           <button
             onClick={handleGetLocation}
-            className="flex-1 bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700 transition duration-200 shadow-md"
+            className="w-full bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700 transition duration-200 shadow-md"
           >
             Use Current Location
           </button>
