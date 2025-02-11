@@ -30,7 +30,16 @@ const PrevArrow = (props) => {
     </div>
   );
 };
-const ForecastDisplay = ({ forecastData }) => {
+const ForecastDisplay = ({ forecastData, currentWeather}) => {
+
+    // Combine current weather (as "Now") with forecast data.
+    const combinedData = [];
+    if (currentWeather) {
+      // Mark current weather with a flag so we know to render the "Now" card.
+      combinedData.push({ isCurrent: true, ...currentWeather });
+    }
+    combinedData.push(...forecastData);
+
   const settings = {
     dots: true,
     infinite: false,
@@ -64,23 +73,41 @@ const ForecastDisplay = ({ forecastData }) => {
   return (
     <div className="mt-8 max-w-3xl mx-auto px-4">
       <Slider {...settings}>
-        {forecastData.map((item, index) => (
+        {combinedData.map((item, index) => (
           <div key={index} className="p-2">
             <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-md text-center p-4 transform hover:-translate-y-1 transition-all duration-300">
-              <h3 className="font-semibold text-sm sm:text-base text-gray-800 mb-2">
-                {new Date(item.dt * 1000).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </h3>
-              <img 
-                src={`http://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`} 
-                alt="Weather Icon" 
-                className="mx-auto w-14 h-14 sm:w-16 sm:h-16" 
-              />
-              <p className="text-sm sm:text-base text-gray-700 mt-2">
-                {Math.round(item.main.temp)}°C
-              </p>
+            {item.isCurrent ? (
+                <>
+                  <h3 className="font-bold text-base sm:text-lg text-gray-800">Now</h3>
+                  {item.icon && (
+                    <img
+                      src={`http://openweathermap.org/img/wn/${item.icon}@2x.png`}
+                      alt="Current Weather Icon"
+                      className="mx-auto w-16 h-16 sm:w-20 sm:h-20"
+                    />
+                  )}
+                  <p className="text-base sm:text-xl text-gray-700">
+                    {Math.round(item.temp)}°C
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="font-bold text-base sm:text-lg text-gray-800">
+                    {new Date(item.dt * 1000).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </h3>
+                  <img
+                    src={`http://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`}
+                    alt="Weather Icon"
+                    className="mx-auto w-16 h-16 sm:w-20 sm:h-20"
+                  />
+                  <p className="text-base sm:text-xl text-gray-700">
+                    {Math.round(item.main.temp)}°C
+                  </p>
+                </>
+              )}
             </div>
           </div>
         ))}

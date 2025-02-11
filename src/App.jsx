@@ -50,6 +50,7 @@ function App() {
         description: weatherData.weather[0].description,
         city: weatherData.name,
         country: weatherData.sys.country,
+        icon:weatherData.weather[0].icon,
       });
 
       // Fetch forecast data using the same query.
@@ -87,6 +88,7 @@ function App() {
         description: data.weather[0].description,
         city: data.name,
         country: data.sys.country,
+        icon:data.weather[0].icon,
       };
       setWeather(weatherData);
 
@@ -182,7 +184,7 @@ function App() {
 
         {/* Forecast Slider */}
         {!loading && forecast.length > 0 && (
-          <ForecastDisplay forecastData={forecast} />
+          <ForecastDisplay forecastData={forecast} currentWeather={weather} />
         )}
       </main>
 
