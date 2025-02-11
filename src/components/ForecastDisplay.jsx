@@ -79,7 +79,7 @@ const ForecastDisplay = ({ forecastData }) => {
                 className="mx-auto w-14 h-14 sm:w-16 sm:h-16" 
               />
               <p className="text-sm sm:text-base text-gray-700 mt-2">
-                {item.main.temp}°C
+                {Math.round(item.main.temp)}°C
               </p>
             </div>
           </div>
