@@ -1,18 +1,25 @@
 // src/components/CitySearch.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const CitySearch = ({ onCitySelect }) => {
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
+    // If a city has been selected, do not fetch new suggestions.
+    if (selectedCity) {
+      setSuggestions([]);
+      return;
+    }
+    if (inputValue.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    setIsLoading(true);
     const fetchCities = async () => {
-      if (inputValue.trim().length < 3) {
-        setSuggestions([]);
-        return;
-      }
-      setIsLoading(true);
       try {
         const response = await fetch(
           `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${encodeURIComponent(
@@ -21,20 +28,17 @@ const CitySearch = ({ onCitySelect }) => {
           {
             method: "GET",
             headers: {
-              "X-RapidAPI-Key": "1a9f1918eemsh20786399055ebeap15247cjsne0e85f5c8076", // Replace with your key
+              "X-RapidAPI-Key": "1a9f1918eemsh20786399055ebeap15247cjsne0e85f5c8076", // Replace with your key if needed
               "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
             },
           }
         );
-
-        // If response is not OK, log error and clear suggestions.
         if (!response.ok) {
           console.error("Error fetching cities. Status:", response.status);
           setSuggestions([]);
           return;
         }
         const data = await response.json();
-        // Ensure data.data exists and is an array
         setSuggestions(data.data || []);
       } catch (err) {
         console.error("Error fetching cities:", err);
@@ -46,33 +50,44 @@ const CitySearch = ({ onCitySelect }) => {
 
     const delayDebounceFn = setTimeout(() => {
       fetchCities();
-    }, 300); // Debounce by 300ms
-
+    }, 300);
     return () => clearTimeout(delayDebounceFn);
-  }, [inputValue]);
+  }, [inputValue, selectedCity]);
+
+  // Listen for clicks outside the component to close the suggestions.
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setSuggestions([]);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
 
   const handleSelect = (city) => {
     setInputValue(city.name);
+    setSelectedCity(city);
     setSuggestions([]);
     onCitySelect(city);
   };
 
-  // Hide suggestions shortly after input loses focus
-  const handleBlur = () => {
-    setTimeout(() => {
-      setSuggestions([]);
-    }, 200);
-  };
-
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" ref={containerRef}>
       <input
         type="text"
         placeholder="Enter city name"
         className="w-full p-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onBlur={handleBlur}
+        onChange={(e) => {
+          setInputValue(e.target.value);
+          // Clear any previous selection if the user starts typing
+          setSelectedCity(null);
+        }}
       />
 
       {/* Skeleton Loader when loading */}
@@ -93,7 +108,11 @@ const CitySearch = ({ onCitySelect }) => {
             <li
               key={city.id}
               className="p-2 hover:bg-gray-100 cursor-pointer text-gray-800 transition-colors"
-              onClick={() => handleSelect(city)}
+              onPointerDown={(e) => {
+                // Using onPointerDown handles both mouse and touch events.
+                e.preventDefault();
+                handleSelect(city);
+              }}
             >
               {city.name}, {city.countryCode}
             </li>

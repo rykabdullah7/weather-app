@@ -6,6 +6,7 @@ import ForecastSkeleton from "./components/ForecastSkeleton";
 import WeatherCard from "./components/WeatherCard";
 import CitySearch from "./components/CitySearch";
 import WritingAnimation from "./components/WritingAnimation"
+
 function App() {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
