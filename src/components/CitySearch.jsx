@@ -28,8 +28,8 @@ const CitySearch = ({ onCitySelect }) => {
           {
             method: "GET",
             headers: {
-              "X-RapidAPI-Key": "1a9f1918eemsh20786399055ebeap15247cjsne0e85f5c8076", // Replace with your key if needed
-              "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
+              "X-RapidAPI-Key": import.meta.env.VITE_RAPIDAPI_KEY, // Replace with your key if needed
+              "X-RapidAPI-Host": import.meta.env.VITE_RAPIDAPI_HOST,
             },
           }
         );
